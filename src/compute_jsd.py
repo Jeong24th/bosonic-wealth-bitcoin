@@ -4,8 +4,13 @@ Compute Jensen-Shannon divergence between empirical and fitted distributions.
 For each UTXO denomination and monthly snapshot, this script:
   1. Loads the empirical distribution P*(k) and fitted beta from summary.csv.
   2. Constructs the theoretical P_beta(k) on a common k grid.
-  3. Computes D_JS(P*, P_beta) using base-2 logarithms.
-  4. Outputs a CSV with all JSD values and prints summary statistics.
+  3. Computes D_JS(P*, P_beta) using base-2 logarithms (D_JS in [0, 1]).
+  4. Outputs a CSV with all JSD values, summary statistics, and a binned
+     distribution table (Table 1 in the paper).
+
+Note: D_JS uses log_2 for information-theoretic interpretation, while
+the KL divergence in bayesian_fitting.py uses ln for direct likelihood
+connection. The two are related by D_KL^{log2} = D_KL^{ln} / ln(2).
 
 Usage
 -----
@@ -129,13 +134,29 @@ def main():
 
     # Summary statistics
     jsd = df["D_JS"].values
-    print(f"\nJSD Summary (N = {len(jsd)}):")
+    n_total = len(jsd)
+    print(f"\nJSD Summary (N = {n_total}):")
     print(f"  Mean:      {jsd.mean():.4f}")
     print(f"  Std. Dev.: {jsd.std():.4f}")
-    print(f"  < 0.08:    {np.sum(jsd < 0.08)}/{len(jsd)} "
-          f"({100 * np.sum(jsd < 0.08) / len(jsd):.2f}%)")
-    print(f"  < 0.10:    {np.sum(jsd < 0.10)}/{len(jsd)} "
-          f"({100 * np.sum(jsd < 0.10) / len(jsd):.2f}%)")
+    print(f"  < 0.08:    {np.sum(jsd < 0.08)}/{n_total} "
+          f"({100 * np.sum(jsd < 0.08) / n_total:.2f}%)")
+    print(f"  < 0.10:    {np.sum(jsd < 0.10)}/{n_total} "
+          f"({100 * np.sum(jsd < 0.10) / n_total:.2f}%)")
+
+    # Binned distribution (Table 1 in the paper)
+    bin_edges = np.arange(0.00, 0.13, 0.01)
+    print(f"\n{'D_JS bin range':>20s} {'Count':>7s} {'Cumul.':>7s} {'Cumul. %':>10s}")
+    print("-" * 48)
+    cumul = 0
+    for i in range(len(bin_edges) - 1):
+        lo, hi = bin_edges[i], bin_edges[i + 1]
+        if i == 0:
+            count = int(np.sum((jsd >= lo) & (jsd <= hi)))
+        else:
+            count = int(np.sum((jsd > lo) & (jsd <= hi)))
+        cumul += count
+        pct = 100.0 * cumul / n_total if n_total > 0 else 0.0
+        print(f"  ({lo:.2f}, {hi:.2f}] {count:7d} {cumul:7d} {pct:9.2f}%")
 
 
 if __name__ == "__main__":

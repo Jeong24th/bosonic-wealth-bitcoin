@@ -23,8 +23,6 @@ bosonic-wealth-bitcoin/
     compute_jsd.py        # Jensen-Shannon divergence analysis
     plot_figures.py        # Main-text figures (Figs. 1-6)
   data/                    # UTXO distribution data (see below)
-  results/                 # Fitting results (generated)
-  figures/                 # Output figures (generated)
   requirements.txt
   LICENSE
   README.md

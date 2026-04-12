@@ -6,6 +6,11 @@ inverse-temperature parameter beta by minimising the Kullback-Leibler
 divergence between the empirical occupancy distribution P*(k) and the
 truncated geometric model P_beta(k) = C_beta * exp(-beta * k).
 
+The KL divergence is defined with the natural logarithm (ln), so that
+the multinomial log-likelihood satisfies ln L = -N * D_KL + const.
+The Jensen-Shannon divergence (computed separately in compute_jsd.py)
+uses log_2, giving D_JS in [0, 1].
+
 The fit is embedded in a Bayesian framework using dynamic nested
 sampling (dynesty), yielding posterior distributions for beta.
 
