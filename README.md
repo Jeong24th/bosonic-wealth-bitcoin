@@ -107,7 +107,17 @@ python src/compute_jsd.py \
     --output results/jsd_results.csv
 ```
 
-### 4. Generate figures
+### 4. Alternative model comparison
+
+```bash
+python src/compare_models.py \
+    --data-dir data/UTXO_distribution \
+    --output results/model_comparison.csv
+```
+
+Compares the geometric distribution against three alternatives (Poisson, negative binomial, discretised log-normal) using AIC across all denomination-month samples.
+
+### 5. Generate figures
 
 ```bash
 python src/plot_figures.py \
