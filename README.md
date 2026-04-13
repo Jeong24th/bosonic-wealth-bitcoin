@@ -115,7 +115,7 @@ python src/compare_models.py \
     --output results/model_comparison.csv
 ```
 
-Compares the geometric distribution against three alternatives (Poisson, negative binomial, discretised log-normal) using AIC across all denomination-month samples.
+Compares the geometric distribution against three alternatives (Poisson, negative binomial, discretised log-normal) using Jensen--Shannon divergence on smoothed distributions across all denomination-month samples. Parameters are fitted by MLE on raw counts; D_JS is then evaluated against the smoothed empirical distribution.
 
 ### 5. Generate figures
 
