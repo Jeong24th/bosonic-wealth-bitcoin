@@ -11,16 +11,22 @@ This repository provides the code for:
 1. **Bayesian inference** of the inverse-temperature parameter $\beta$ for truncated geometric distributions fitted to Bitcoin UTXO occupancy data.
 2. **Numerical simulations** of minimal exchange processes (Poisson and geometric equilibria).
 3. **Jensen--Shannon divergence** computation between empirical and fitted distributions across all denominations and time snapshots.
-4. **Figure generation** for the main text (Figs. 1--6).
+4. **Alternative-model comparison** against truncated Poisson, negative binomial, and discretised log-normal.
+5. **Robustness checks** supporting the geometric hypothesis: $\beta$–$m$ self-consistency, smoothing-window sensitivity, Gini coefficient agreement, and Kolmogorov–Smirnov statistic.
+6. **Figure generation** for the main text (Figs. 1--6).
 
 ## Repository structure
 
 ```
 bosonic-wealth-bitcoin/
   src/
-    bayesian_fitting.py   # Bayesian parameter inference (dynesty)
-    simulate.py           # Minimal exchange simulations
-    compute_jsd.py        # Jensen-Shannon divergence analysis
+    bayesian_fitting.py    # Bayesian parameter inference (dynesty)
+    simulate.py            # Minimal exchange simulations
+    compute_jsd.py         # Jensen-Shannon divergence analysis
+    compare_models.py      # Alternative-model comparison
+    beta_m_consistency.py  # beta-m self-consistency test
+    gini_ks.py             # Gini and Kolmogorov-Smirnov checks
+    window_sensitivity.py  # Smoothing window sensitivity
     plot_figures.py        # Main-text figures (Figs. 1-6)
   data/                    # UTXO distribution data (see below)
   requirements.txt
@@ -117,7 +123,41 @@ python src/compare_models.py \
 
 Compares the geometric distribution against three alternatives (Poisson, negative binomial, discretised log-normal) using Jensen--Shannon divergence on smoothed distributions across all denomination-month samples. Parameters are fitted by MLE on raw counts; D_JS is then evaluated against the smoothed empirical distribution.
 
-### 5. Generate figures
+### 5. Robustness checks
+
+#### 5a. $\beta$–$m$ self-consistency
+
+```bash
+python src/beta_m_consistency.py \
+    --fit-dir results/fitting_results \
+    --output results/beta_m_all.csv
+```
+
+Verifies that, for each of the $4{,}536$ denomination-month samples, the Bayesian-inferred $\beta_i$ and the value $\beta_i^{(m)}$ obtained by inverting the analytic mean relation at the empirical mean $m_i^\star$ coincide. This is a nontrivial test that two-parameter phenomenological models cannot pass.
+
+#### 5b. Gini and Kolmogorov–Smirnov
+
+```bash
+python src/gini_ks.py \
+    --data-dir data/UTXO_distribution \
+    --fit-dir results/fitting_results \
+    --output results/gini_ks.csv
+```
+
+Computes the empirical Gini coefficient versus the theoretical value from the fitted $\beta_i$, and a discrete Kolmogorov–Smirnov statistic between empirical and fitted CDFs.
+
+#### 5c. Smoothing-window sensitivity
+
+```bash
+python src/window_sensitivity.py \
+    --data-dir data/UTXO_distribution \
+    --windows 1,5,9,15,21 \
+    --output results/window_sensitivity.csv
+```
+
+Repeats the geometric goodness-of-fit over multiple smoothing window widths to verify that the main conclusions are insensitive to the smoothing scale.
+
+### 6. Generate figures
 
 ```bash
 python src/plot_figures.py \
