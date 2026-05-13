@@ -13,22 +13,25 @@ This repository provides the code for:
 3. **Jensen--Shannon divergence** computation between empirical and fitted distributions across all denominations and time snapshots.
 4. **Alternative-model comparison** against truncated Poisson, negative binomial, and discretised log-normal.
 5. **Robustness checks** supporting the geometric hypothesis: $\beta$–$m$ self-consistency, smoothing-window sensitivity, Gini coefficient agreement, and Kolmogorov–Smirnov statistic.
-6. **Figure generation** for the main text (Figs. 1--6).
+6. **Universality analysis** of $\beta_i$ across denominations and time (Section 2.4 of the paper, Fig. 7).
+7. **Figure generation** for the main text and Supplementary Information.
 
 ## Repository structure
 
 ```
 bosonic-wealth-bitcoin/
   src/
-    bayesian_fitting.py    # Bayesian parameter inference (dynesty)
-    simulate.py            # Minimal exchange simulations
-    compute_jsd.py         # Jensen-Shannon divergence analysis
-    compare_models.py      # Alternative-model comparison
-    beta_m_consistency.py  # beta-m self-consistency test
-    gini_ks.py             # Gini and Kolmogorov-Smirnov checks
-    window_sensitivity.py  # Smoothing window sensitivity
-    plot_figures.py        # Main-text figures (Figs. 1-6)
-  data/                    # UTXO distribution data (see below)
+    bayesian_fitting.py     # Bayesian parameter inference (dynesty)
+    simulate.py             # Minimal exchange simulations
+    compute_jsd.py          # Jensen-Shannon divergence analysis
+    compare_models.py       # Alternative-model comparison
+    beta_m_consistency.py   # beta-m self-consistency test
+    gini_ks.py              # Gini and Kolmogorov-Smirnov checks
+    window_sensitivity.py   # Smoothing window sensitivity
+    beta_i_universality.py  # Per-denomination beta_i aggregation
+    plot_beta_i.py          # Figs for Section 2.4 (Fig. 7 + SI)
+    plot_figures.py         # Main-text figures (Figs. 1-6)
+  data/                     # UTXO distribution data (see below)
   requirements.txt
   LICENSE
   README.md
@@ -157,7 +160,23 @@ python src/window_sensitivity.py \
 
 Repeats the geometric goodness-of-fit over multiple smoothing window widths to verify that the main conclusions are insensitive to the smoothing scale.
 
-### 6. Generate figures
+### 6. Universality of $\beta_i$ (Section 2.4)
+
+```bash
+python src/beta_i_universality.py \
+    --fit-dir results/fitting_results \
+    --output results/beta_per_denomination.csv
+
+python src/plot_beta_i.py \
+    --beta-summary results/beta_per_denomination.csv \
+    --fit-dir results/fitting_results \
+    --out-main figures/beta_vs_i.png \
+    --out-si   figures/SI_beta_time_stability.png
+```
+
+`beta_i_universality.py` aggregates the per-date Bayesian fits, producing per-denomination $\langle\beta_i\rangle$ and $\sigma(\beta_i)$ together with coefficient-of-variation statistics. `plot_beta_i.py` renders Figure 7 of the main text (denomination dependence and normalised time evolution of $\beta_i$) and the corresponding SI time-stability figure.
+
+### 7. Generate main-text figures (Figs. 1--6)
 
 ```bash
 python src/plot_figures.py \
